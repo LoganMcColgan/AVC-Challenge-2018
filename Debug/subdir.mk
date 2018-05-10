@@ -4,13 +4,28 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../AVCTest.cpp 
+../AVCBasicMove.cpp \
+../AVCImageProcessing.cpp \
+../AVCMovements.cpp \
+../AVCTest.cpp \
+../read.cpp 
+
+O_SRCS += \
+../read.o 
 
 OBJS += \
-./AVCTest.o 
+./AVCBasicMove.o \
+./AVCImageProcessing.o \
+./AVCMovements.o \
+./AVCTest.o \
+./read.o 
 
 CPP_DEPS += \
-./AVCTest.d 
+./AVCBasicMove.d \
+./AVCImageProcessing.d \
+./AVCMovements.d \
+./AVCTest.d \
+./read.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
