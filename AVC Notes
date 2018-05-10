@@ -1,0 +1,20 @@
+Compile file
+g++ -o filename filename.cpp -le101
+./example <-- Executes file
+
+Establish ssh connection with RPI
+ssh -x pi@10.140.30.97
+
+Motor 2 is the slow motor (right motor)
+
+Motor 1 is left at -100
+Motor 2 is right at -175
+At these values, bot will go straight
+So the right motor is off by a factor of 75...
+
+Wiring makes it so that negative values move the robot forward
+
+Makes 90 degree turn to the right - Apply for maze
+Motor 1 : -175
+Motor 2: 175
+sleep1(1, 25000);
