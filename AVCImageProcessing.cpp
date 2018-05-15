@@ -1,6 +1,9 @@
 #include <stdio.h>
-#include "E101.h"
+#include "/home/pi/Desktop/MYLibrary/LibE101/E101.h"
 #include <time.h>
+#include <sys/time.h>
+#include <fstream>
+#include <iostream>
 
 /*Notes - Delete this before hand in
  * - Comments with '####' denotes comments that should be deleted before hand in or replace with
@@ -20,28 +23,23 @@
  *
  * -  */
 
+/*
 int open_gate(){
 
-	/*Makes connection with server - returns 0 if connection is succesful*/
 	int make_connection = connect_to_server("130.195.6.196", 1024);
 
-	/*#### Test print to see if the connection is successful. 0 means connection is
-	 * established with server ####*/
 	printf("\nmake_connection = %d", make_connection);
 
-	/*Sends message 'Please' to server. value stored in message variable should be
-	 * 0 after transmitting message*/
 	int message = send_to_server("Please");
 
-	/*Server transmits password back. Password stored in variable*/
 	int password = receive_from_server("");
 
-	/*Send password back to server*/
 	message = send_to_server("");
 
 	return 0;
 
 }
+*/
 
 /*Method used to follow the white lines using error values and PID concepts*/
 int follow_white_line(double error){
@@ -74,6 +72,10 @@ int follow_white_line(double error){
 /*Method to read the image in memory*/
 void read_image(){/*#### Need to discuss what this method should return ####*/
 
+	/*#### For logs - Remove later ####*/
+	std::ofstream testlogs;
+	testlogs.open("testlogs.txt", std::ios_base::app);
+
 	/* ##### This variable will be set to true later when the camera sees the red strip at the
 	 * end of quadrant 2 (since we are using sensors for quadrant 3 instead of camera right?)####*/
 	bool seen_red = false;
@@ -88,101 +90,120 @@ void read_image(){/*#### Need to discuss what this method should return ####*/
 	double ratio = 0;
 	int number_white_pixels = 0;
 	int red_pixel = 0;
+	int green_pixel = 0;
+	int blue_pixel = 0;
+	struct timeval time;
+	double time1 = 0;
+	double time2 = 0;
+
 
 	/*#### Variables used for test print purposes in the for loops below ####*/
 	int black = 0;
-	int white = 0;
+	int white = 1;
 	int row_count = 0;
 
 	while(seen_red == false){
+		/*Sets error to 0 at the start of the iteration*/
+		error = 0;
 
-		/*Takes picture, saves into memory*/
-		take_picture();
+		gettimeofday(&time, 0);
+		time1 = time.tv_sec+(time.tv_usec/1000000.0);
 
-		/*Looks for a red in the center row*/
-		for(int i = 0; i<320; i++){
-			red_pixel = get_pixel(row, i, 3);
-			if(red_pixel > 200){ //if red exceeds estimated red threshold, red strip detected, exit method
-				break;
+		if (time1-time2 > 0.5){//If time elapsed is 0.5 seconds, perform image processing
+			/*Takes picture, saves into memory*/
+			take_picture();
+
+			/*Looks for a red in the center row*/
+			for(int i = 0; i<320; i++){
+
+				/*Takes readings for all the colors in each pixel*/
+				red_pixel = get_pixel(row, i, 0);
+				green_pixel = get_pixel(row, i, 1);
+				blue_pixel = get_pixel(row, i, 32);
+
+				if(red_pixel > 200 && green_pixel < 50 && blue_pixel < 50){ //if red exceeds estimated red threshold, red strip detected, exit method
+					return;
+				}
 			}
+
+			/*A for loop to determine the max and min values of white which can be used to
+			 * calculate the threshold*/
+			for(int i =0; i<320; i++){
+
+				pixel = get_pixel(row, i, 3);
+
+				/*First time the for loop runs, the maximum_level is set to the
+				 * first pixel by default. As the for loop continues for the remaining columns in the
+				 * row, max level and min level is set accordingly if the current pixel in iteration
+				 * meets the conditions*/
+				if (pixel > maximum_level){
+					maximum_level = pixel;
+				}
+				if(pixel < minimum_level){
+					minimum_level = pixel;
+				}
+			}
+			
+			/*Calculating threshold*/
+			white_threshold = (maximum_level - minimum_level) / 2;
+
+			/*A for loop to detect the level of white for the pixels in the center row*/
+			for(int i=0; i<320; i++){
+				pixel = get_pixel(row, i, 3);//row = 120
+
+				if(pixel>white_threshold){
+					printf("%d", white);
+					pixel = 1; //Sets pixel to 1 if it passes the threshold
+					number_white_pixels++; //Incrementing number of white pixels if the pixel passes the threshold
+
+				}else{
+					pixel = 0;//Sets pixel to 0 if it does not pass the threshold
+					printf("%d", black);
+				}
+
+				/*Uses the idea of negation to give an approximate distance of how far the robot
+				 * is from the white line. The smaller the value of error, the closer to the
+				 * white line*/
+				error += (i-160)*pixel; //Error is the distance of the white line to the central pixel
+
+				/*#### For testing purposes, prints 1s and 0s on multiple lines instead of being
+				 * just printed on one big line*/
+				if(row_count == 20){
+					printf("\n"); //Creates new line
+					row_count = 0;
+				}
+
+				row_count++;
+			}
+
+			/*Normalising error so we can find out how far out the white lines relative to the
+			 * central pixel*/
+			if(number_white_pixels != 0){
+				error/=number_white_pixels;
+			}
+
+			/* #### Getting ratio to determine which side to increase - See pseudocode ####*/
+			ratio = 3200/error;
+
+			/*#### Appending to test log file - Remove later ####*/
+			testlogs << "\n**** START LOG ****";
+			testlogs << "\nerror = \t" << error << "";
+			testlogs << "\npixel \t" << pixel <<"";
+			testlogs << "\nratio = \t" << ratio <<"";
+			testlogs << "\nwhite_threshold = \t" << white_threshold << "";
+			testlogs << "\n#### END LOG ####";
+			testlogs << "\n";
+
+			/*Calls follow_white_line method passing error as argument*/
+			follow_white_line(error);
 		}
-
-		/*A for loop to determine the max and min values of white which can be used to
-		 * calculate the threshold*/
-		for(int i =0; i<320; i++){
-
-			pixel = get_pixel(row, i, 3);
-
-			/*First time the for loop runs, the maximum_level is set to the
-			 * first pixel by default. As the for loop continues for the remaining columns in the
-			 * row, max level and min level is set accordingly if the current pixel in iteration
-			 * meets the conditions*/
-			if (pixel < maximum_level){
-				maximum_level = pixel;
-			}
-
-			if(pixel < minimum_level){
-				minimum_level = pixel;
-			}
-		}
-
-		/*Calculating threshold*/
-		white_threshold = (maximum_level - minimum_level) / 2;
-		printf("\nwhite_threshold = %f", white_threshold);
-
-		/*A for loop to detect the level of white for the pixels in the center row*/
-		for(int i=0; i<320; i++){
-			pixel = get_pixel(row, i, 3);//row = 120
-
-			if(pixel>white_threshold){
-				printf("%d", white);
-				pixel = 1; //Sets pixel to 1 if it passes the threshold
-				number_white_pixels++; //Incrementing number of white pixels if the pixel passes the threshold
-
-			}else{
-				pixel = 0;//Sets pixel to 0 if it does not pass the threshold
-				printf("%d", black);
-			}
-
-			/*Uses the idea of negation to give an approximate distance of how far the robot
-			 * is from the white line. The smaller the value of error, the closer to the
-			 * white line*/
-			error += (i-160)*pixel; //Error is the distance of the white line to the central pixel
-
-
-			/*#### For testing purposes, prints 1s and 0s on multiple lines instead of being
-			 * just printed on one big line*/
-			if(row_count == 20){
-				printf("\n"); //Creates new line
-				row_count = 0;
-			}
-
-			row_count++;
-		}
-
-		/* #### Getting ratio to determine which side to increase - See pseudocode ####*/
-		double ratio = 3200/error;
-
-		/*Normalising error so we can find out how far out the white lines relative to the
-		 * central pixel*/
-		error /= number_white_pixels;
-
-		/*#### Test print some stuff here to see if the code above actually works.... ####*/
-		printf("\nnumber_white_pixels = %d", number_white_pixels);
-		printf("\nnormalized error = %f", error);
-
-		/*Calls follow_white_line method passing error as argument*/
-		follow_white_line(error);
-	}
-
+	}//End of while
 	return;
 }
 
 int main(){
 	init();
-	open_gate(); //Opens gate for (Quadrant 1)
+	//open_gate(); //Opens gate for (Quadrant 1)
 	read_image();//Reads and follows the path (Quadrant 2 and 3)
-
-
 	return 0;
 }

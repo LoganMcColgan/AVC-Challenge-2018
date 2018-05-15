@@ -7,7 +7,6 @@ CPP_SRCS += \
 ../AVCBasicMove.cpp \
 ../AVCImageProcessing.cpp \
 ../AVCMovements.cpp \
-../AVCNetwork.cpp \
 ../AVCTest.cpp \
 ../read.cpp 
 
@@ -18,7 +17,6 @@ OBJS += \
 ./AVCBasicMove.o \
 ./AVCImageProcessing.o \
 ./AVCMovements.o \
-./AVCNetwork.o \
 ./AVCTest.o \
 ./read.o 
 
@@ -26,7 +24,6 @@ CPP_DEPS += \
 ./AVCBasicMove.d \
 ./AVCImageProcessing.d \
 ./AVCMovements.d \
-./AVCNetwork.d \
 ./AVCTest.d \
 ./read.d 
 
