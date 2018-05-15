@@ -143,9 +143,9 @@ void read_image(){/*#### Need to discuss what this method should return ####*/
 					minimum_level = pixel;
 				}
 			}
-			
+
 			/*Calculating threshold*/
-			white_threshold = (maximum_level - minimum_level) / 2;
+			white_threshold = (maximum_level + minimum_level) / 2;
 
 			/*A for loop to detect the level of white for the pixels in the center row*/
 			for(int i=0; i<320; i++){
