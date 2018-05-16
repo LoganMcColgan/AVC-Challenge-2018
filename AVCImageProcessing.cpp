@@ -23,23 +23,27 @@
  *
  * -  */
 
-/*
+
 int open_gate(){
 
-	int make_connection = connect_to_server("130.195.6.196", 1024);
+	char serverName[15] = "130.195.6.196";
+	int port = 1024;
+	char message[24] = "Please";
+
+	int make_connection = connect_to_server(serverName[15], port);
 
 	printf("\nmake_connection = %d", make_connection);
 
-	int message = send_to_server("Please");
+	int message = send_to_server(message[24]);
 
-	int password = receive_from_server("");
+	int password = receive_from_server(message[24]);
 
-	message = send_to_server("");
+	send_to_server(message[24]);
 
 	return 0;
 
 }
-*/
+
 
 /*Method used to follow the white lines using error values and PID concepts*/
 int follow_white_line(double error){
@@ -55,7 +59,8 @@ int follow_white_line(double error){
 
 	/*Calculating the difference in motor velocities by taking into account the
 	 * error and the kp*/
-	difference_velocity = error * kp; //Calculates the dv - result is a double
+	difference_velocity = (int)((double)error * kp); //Calculates the dv - result is a double
+
 	//difference_velocity_unsigned = (unsigned char)difference_velocity; //casting back to unsigned char for use in set_motor methods
 
 	/*Calculating velocities of the motors which scales with the error and kp*/
