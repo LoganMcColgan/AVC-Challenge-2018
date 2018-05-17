@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include "/home/pi/Desktop/MYLibrary/LibE101/E101.h"
+
+int main(){
+	init();
+
+int left = read_analog(0);
+int right = read_analog(1);
+int forward = read_analog(2);
+
+set_motor(1,75);
+set_motor(2,175);
+
+while (true){
+
+while (left > x){
+set_motor(1,75); 
+set_motor(2,175); //higher
+}
+
+set_motor(1,75); 
+set_motor(2,175);
+
+while (right > x){
+set_motor(1,75); //higher
+set_motor(2,175);
+}
+
+set_motor(1,75);
+set_motor(2,175);
+
+scan for gate
+
+if (left !=< x2 && right !=< x2){
+set_motor(1,0);
+set_motor(2,0);
+90degreeright
+set_motor(1,75);
+set_motor(2,175);
+}
+
+else if (left !=< x2 && right =< x2){
+set_motor(1,0);
+set_motor(2,0);
+90degreeleft
+set_motor(1,75);
+set_motor(2,175);
+}
+
+else if (left =< x2 && right =< x2){
+set_motor(1,0);
+set_motor(2,0);
+90degreeright
+set_motor(1,75);
+set_motor(2,175);
+}
+
+if (foward => x){
+
+set_motor(1,0);
+set_motor(2,0);
+
+
+if (left !=< x2 && right !=< x2){
+90degreeright
+set_motor(1,75);
+set_motor(2,175);
+}
+
+else if (left !=< x2 && right =< x2){
+90degreeleft
+set_motor(1,75);
+set_motor(2,175);
+}
+
+else if (left =< x2 && right =< x2){
+90degreeright
+set_motor(1,75);
+set_motor(2,175);
+}
+
+}
